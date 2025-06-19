@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "install": "node-gyp rebuild"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "gypfile": true,
   "dependencies": {
     "node-addon-api": "^8.4.0"

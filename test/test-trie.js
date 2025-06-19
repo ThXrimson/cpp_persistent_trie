@@ -1,4 +1,4 @@
-const { Trie } = require("../build/Release/persistent_trie.node");
+const Trie = require("../index");
 
 const trie = new Trie();
 trie.insert("hello");

@@ -1,4 +1,4 @@
-export class Trie {
+declare class Trie {
   /**
    * 构造函数，当前无参数
    */
@@ -32,3 +32,5 @@ export class Trie {
    */
   load(filename: string): boolean;
 }
+
+module.exports = Trie;
