@@ -4,13 +4,17 @@ git clone this repository and build the project:
 
 ```bash
 git clone https://github.com/ThXrimson/cpp_persistent_trie.git
-cd cpp_persistent_trie
-npm run rebuild
 ```
 And in your npm project, install the package:
 
 ```bash
 npm install <path-to-cpp_persistent_trie>
+```
+
+or install from github:
+
+```bash
+npm install https://github.com/ThXrimson/cpp_persistent_trie.git
 ```
 
 Then, in your JavaScript code, you can use commonjs-style imports or ES6-style imports:
