@@ -32,7 +32,7 @@ std::vector<std::u16string> Trie::searchPrefix(const std::u16string &prefix,
         node = node->children[c];
     }
     std::u16string current = prefix;
-    bfs(node, current, result, limit);
+    dfs(node, current, result, limit);
     return result;
 }
 
@@ -67,72 +67,41 @@ bool Trie::load(const std::string &filename) {
     return true;
 }
 
-void Trie::bfs(const TrieNode *node, std::u16string &prefix,
+void Trie::dfs(const TrieNode *node, std::u16string &prefix,
                std::vector<std::u16string> &result, const int limit) {
-    auto dq1 = std::deque<std::tuple<const TrieNode *, std::u16string> >();
-    auto dq2 = std::deque<std::tuple<const TrieNode *, std::u16string> >();
-    dq1.emplace_back(node, prefix.substr(prefix.size() - 1, 1));
-    prefix.pop_back();
-    while ((limit == -1 || static_cast<int>(result.size()) < limit) && !dq1.empty()) {
-        while (!dq1.empty()) {
-            const auto curr = dq1.front();
-            dq1.pop_front();
-            if (std::get<0>(curr)->isWord) {
-                result.emplace_back(prefix + std::get<1>(curr));
-            }
-            for (const auto &[chr, child]: std::get<0>(curr)->children) {
-                dq2.emplace_back(child, std::get<1>(curr) + chr);
-            }
-        }
-        std::swap(dq1, dq2);
+    if (limit != -1 && result.size() == limit) return;
+    if (node->isWord) {
+        result.push_back(prefix);
+    }
+    for (auto &[chr, child]: node->children) {
+        prefix.push_back(chr);
+        dfs(child, prefix, result, limit);
+        prefix.pop_back();
+        if (limit != -1 && result.size() == limit) return;
     }
 }
 
-// BFS序列化节点
+// DFS序列化节点
 void Trie::saveNode(BufferWriter &bw, TrieNode *node) {
-    auto dq = std::deque<std::tuple<char16_t, TrieNode *> >();
-    dq.emplace_back(u'\0', node);
-    while (!dq.empty()) {
-        const auto curr = dq.front();
-        dq.pop_front();
-        bw.write(std::get<0>(curr));
-        bw.write(std::get<1>(curr)->isWord);
-        const auto size = static_cast<uint32_t>(std::get<1>(curr)->children.size());
-        bw.write(size);
-        for (auto &[chr, child]: std::get<1>(curr)->children) {
-            dq.emplace_back(chr, child);
-        }
+    bw.write(node->isWord);
+    const uint32_t size = node->children.size();
+    bw.write(size);
+    for (auto &[chr, child]: node->children) {
+        bw.write(chr);
+        saveNode(bw, child);
     }
 }
 
-// BFS反序列化节点
+// DFS反序列化节点
 TrieNode *Trie::loadNode(BufferReader &br) {
-    auto dq1 = std::deque<std::tuple<TrieNode *, uint32_t> >();
-    auto dq2 = std::deque<std::tuple<char16_t, TrieNode *, uint32_t> >();
-    while (!br.eof()) {
-        char16_t c;
-        br.read(c);
-        const auto node = new TrieNode();
-        br.read(node->isWord);
-        uint32_t size = 0;
-        br.read(size);
-        dq2.emplace_back(c, node, size);
+    const auto node = new TrieNode();
+    br.read(node->isWord);
+    uint32_t size;
+    br.read(size);
+    for (uint32_t i = 0; i < size; i++) {
+        char16_t chr;
+        br.read(chr);
+        node->children[chr] = loadNode(br);
     }
-    TrieNode *res = std::get<1>(dq2.front());
-    dq1.emplace_back(std::get<1>(dq2.front()), std::get<2>(dq2.front()));
-    dq2.pop_front();
-    while (!dq1.empty()) {
-        auto curr = std::get<0>(dq1.front());
-        auto currSize = std::get<1>(dq1.front());
-        dq1.pop_front();
-        for (uint32_t i = 0; i < currSize; i++) {
-            auto next = dq2.front();
-            dq2.pop_front();
-            if (std::get<2>(next) > 0) {
-                dq1.emplace_back(std::get<1>(next), std::get<2>(next));
-            }
-            curr->children[std::get<0>(next)] = std::get<1>(next);
-        }
-    }
-    return res;
+    return node;
 }

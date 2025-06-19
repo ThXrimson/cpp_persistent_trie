@@ -83,7 +83,7 @@ public:
 private:
     TrieNode *root;
 
-    static void bfs(const TrieNode *node, std::u16string &prefix,
+    static void dfs(const TrieNode *node, std::u16string &prefix,
                           std::vector<std::u16string> &result, int limit);
 
     // 递归序列化节点
