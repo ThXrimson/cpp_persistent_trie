@@ -1,4 +1,4 @@
-const Trie = require("../index");
+const { Trie } = require("../index");
 
 const trie = new Trie();
 trie.insert("hello");

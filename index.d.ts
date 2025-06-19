@@ -33,4 +33,4 @@ declare class Trie {
   load(filename: string): boolean;
 }
 
-module.exports = Trie;
+export { Trie };
